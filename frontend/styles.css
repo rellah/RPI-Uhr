@@ -1,0 +1,105 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+}
+
+.clock {
+    font-size: 15vw;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+}
+
+.status {
+    font-size: 5vw;
+    margin-bottom: 30px;
+    min-height: 6vw;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Textschatten hinzufügen */
+}
+
+/* Pausenmodus */
+body.break-mode {
+    background-color: #f9c941;
+}
+
+.break-mode .clock,
+.break-mode .status {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Stärkerer Schatten für bessere Lesbarkeit */
+}
+
+.progress-container {
+    width: 80%;
+    height: 15px; /* Dünner für subtilere Darstellung */
+    background-color: #555555; /* Dunkleres Grau */
+    border-radius: 8px; /* Abgerundete Ecken */
+    margin: 0 auto;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3); /* Innenliegender Schatten für Tiefe */
+    border: 1px solid rgba(0, 0, 0, 0.2); /* Dünner Rand */
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, #ffffff, #f0f0f0); /* Subtiler Farbverlauf */
+    width: 100%;
+    transition: width 1s linear;
+    border-radius: 7px; /* Abgerundete Ecken innerhalb des Containers */
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Leichter Glow-Effekt */
+}
+
+.status {
+    font-size: 5vw;
+    margin-bottom: 30px;
+    min-height: 6vw;
+}
+
+.progress-container {
+    width: 80%;
+    height: 30px;
+    background-color: #333;
+    border-radius: 15px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #808080; /* Grau */
+    width: 100%; /* Startet voll */
+    transition: width 1s linear;
+}
+
+.connection-status {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 1.5vw;
+    color: #aaa;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Pausenmodus */
+body.break-mode {
+    background-color: #f9c941;
+}
+
+.break-mode .clock {
+    /* Keine zusätzlichen Änderungen an der Uhr */
+}
