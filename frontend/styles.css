@@ -5,29 +5,96 @@ body {
     background-color: #000;
     color: #fff;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.container {
-    text-align: center;
-    width: 100%;
+.main-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
 }
 
 .clock {
     font-size: 15vw;
     font-weight: bold;
-    margin-bottom: 20px;
+    font-family: monospace; /* Gleichmäßige Zeichenbreite */
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    margin: 0;
+    letter-spacing: 1px; /* Verbesserte Lesbarkeit */
 }
 
 .status {
     font-size: 5vw;
-    margin-bottom: 30px;
     min-height: 6vw;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Textschatten hinzufügen */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 20px 0;
+}
+
+.progress-container {
+    width: 80%;
+    height: 15px;
+    background-color: #555555;
+    border-radius: 8px;
+    margin: 20px auto;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: none; /* Standardmäßig ausgeblendet */
+}
+
+/* Nur während Pausen anzeigen */
+.break-mode .progress-container {
+    display: block; /* Bei aktiver Pause anzeigen */
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, #ffffff, #f0f0f0);
+    width: 100%;
+    transition: width 1s linear;
+    border-radius: 7px;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
+}
+
+.connection-status {
+    font-size: 1.5vw;
+    display: flex;
+    gap: 5px;
+    opacity: 0.7;
+}
+
+.connection-status span {
+    display: none;
+}
+
+#status-connected {
+    color: #4CAF50;
+    display: none;
+}
+
+#status-warning {
+    color: #FF9800;
+    display: none;
+}
+
+#status-error {
+    color: #FF5722;
+    display: none;
 }
 
 /* Pausenmodus */
@@ -38,64 +105,5 @@ body.break-mode {
 .break-mode .clock,
 .break-mode .status {
     color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Stärkerer Schatten für bessere Lesbarkeit */
-}
-
-.progress-container {
-    width: 80%;
-    height: 15px; /* Dünner für subtilere Darstellung */
-    background-color: #555555; /* Dunkleres Grau */
-    border-radius: 8px; /* Abgerundete Ecken */
-    margin: 0 auto;
-    overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3); /* Innenliegender Schatten für Tiefe */
-    border: 1px solid rgba(0, 0, 0, 0.2); /* Dünner Rand */
-}
-
-.progress-bar {
-    height: 100%;
-    background: linear-gradient(to right, #ffffff, #f0f0f0); /* Subtiler Farbverlauf */
-    width: 100%;
-    transition: width 1s linear;
-    border-radius: 7px; /* Abgerundete Ecken innerhalb des Containers */
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Leichter Glow-Effekt */
-}
-
-.status {
-    font-size: 5vw;
-    margin-bottom: 30px;
-    min-height: 6vw;
-}
-
-.progress-container {
-    width: 80%;
-    height: 30px;
-    background-color: #333;
-    border-radius: 15px;
-    margin: 0 auto;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background-color: #808080; /* Grau */
-    width: 100%; /* Startet voll */
-    transition: width 1s linear;
-}
-
-.connection-status {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    font-size: 1.5vw;
-    color: #aaa;
-}
-
-.hidden {
-    display: none;
-}
-
-/* Pausenmodus */
-body.break-mode {
-    background-color: #f9c941;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }

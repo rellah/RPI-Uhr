@@ -7,22 +7,30 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div id="clock" class="clock">00:00:00</div>
-        <div id="status" class="status"></div>
-        <div id="progress-container" class="progress-container hidden">
-            <div id="progress-bar" class="progress-bar"></div>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div id="clock" class="clock">00:00:00</div>
+            <div id="status" class="status"></div>
+            <div id="progress-container" class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
         </div>
-        <div id="connection-status" class="connection-status">Verbinde mit Server...</div>
+        <div class="footer">
+            <div id="connection-status" class="connection-status">
+                <span id="status-connected">✓</span>
+                <span id="status-warning">⚠️</span>
+                <span id="status-error">✗</span>
+            </div>
+        </div>
     </div>
     <!-- Fügen Sie folgende Audiodateien hinzu:
-         - start-alert.mp3: Ton für Pausenbeginn
-         - end-alert.mp3: Ton für Pausenende -->
+         - break-start.mp3: Ton für Pausenbeginn
+         - break-end.mp3: Ton für Pausenende -->
     <audio id="start-alert" preload="auto">
-        <source src="start-alert.mp3" type="audio/mpeg">
+        <source src="break-start.mp3" type="audio/mpeg">
     </audio>
     <audio id="end-alert" preload="auto">
-        <source src="end-alert.mp3" type="audio/mpeg">
+        <source src="break-end.mp3" type="audio/mpeg">
     </audio>
     <script src="app.js"></script>
 </body>

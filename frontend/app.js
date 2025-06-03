@@ -11,28 +11,66 @@ document.addEventListener('DOMContentLoaded', () => {
     let isBreakActive = false;
     let currentBreak = null;
     let lastBreakId = null;
+    let timeOffset = 0; // Zeitdifferenz zwischen Browser und NTP in Sekunden
     
-    // Konfiguration vom Server abrufen
+    // Zeit mit NTP-Server synchronisieren
+    async function synchronizeTime() {
+        try {
+            const response = await fetch('/api/ntp-time');
+            if (!response.ok) throw new Error('NTP-Anfrage fehlgeschlagen');
+            const data = await response.json();
+            
+            if (data.ntp_time) {
+                const now = Math.floor(Date.now() / 1000); // Aktuelle Zeit in Sekunden
+                timeOffset = data.ntp_time - now;
+                console.log(`Zeitsynchronisation erfolgreich. Offset: ${timeOffset} Sekunden`);
+            }
+            return true;
+        } catch (error) {
+            console.error('Zeitsynchronisation fehlgeschlagen:', error);
+            return false;
+        }
+    }
+    
+    // Konfiguration vom Server abrufen und im localStorage speichern
     async function fetchConfig() {
         try {
             const response = await fetch('/api/config');
             if (!response.ok) throw new Error('Fehler beim Abrufen der Konfiguration');
             const data = await response.json();
             breaks = data.breaks || [];
-            connectionStatus.textContent = `Verbunden (v${data.version})`;
-            connectionStatus.style.color = '#4CAF50';
+            
+            // Konfiguration im localStorage speichern
+            localStorage.setItem('breakConfig', JSON.stringify(data));
+            
+            document.getElementById('status-connected').style.display = 'inline';
+            document.getElementById('status-warning').style.display = 'none';
+            document.getElementById('status-error').style.display = 'none';
             return true;
         } catch (error) {
             console.error('Fehler:', error);
-            connectionStatus.textContent = 'Keine Verbindung zum Server';
-            connectionStatus.style.color = '#FF5722';
+            
+            // Fallback auf gecachte Konfiguration
+            const cachedConfig = localStorage.getItem('breakConfig');
+            if (cachedConfig) {
+                const data = JSON.parse(cachedConfig);
+                breaks = data.breaks || [];
+                document.getElementById('status-connected').style.display = 'none';
+                document.getElementById('status-warning').style.display = 'inline';
+                document.getElementById('status-error').style.display = 'none';
+                return true;
+            }
+            
+            document.getElementById('status-connected').style.display = 'none';
+            document.getElementById('status-warning').style.display = 'none';
+            document.getElementById('status-error').style.display = 'inline';
             return false;
         }
     }
     
-    // Uhrzeit aktualisieren
+    // Uhrzeit aktualisieren mit Zeitkorrektur
     function updateClock() {
-        const now = new Date();
+        const now = new Date(Date.now() + timeOffset * 1000);
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -67,10 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function startBreak(breakItem, now) {
         isBreakActive = true;
         currentBreak = breakItem;
-        document.body.classList.add('break-mode'); // Hintergrundfarbe aktivieren
+        document.body.classList.add('break-mode');
         statusElement.textContent = 'PAUSE';
-        progressContainer.classList.remove('hidden');
-        progressBar.style.width = '100%'; // Start bei 100%
+        progressBar.style.width = '100%';
         
         // Ton für Pausenbeginn abspielen
         startAlertSound.play();
@@ -81,9 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function endBreak() {
         isBreakActive = false;
         currentBreak = null;
-        document.body.classList.remove('break-mode'); // Hintergrundfarbe deaktivieren
+        document.body.classList.remove('break-mode');
         statusElement.textContent = '';
-        progressContainer.classList.add('hidden');
         endAlertSound.play(); // Signal für Pausenende
     }
     
@@ -112,13 +148,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Initialisierung
-    fetchConfig().then(success => {
-        if (success) {
-            updateClock();
-            setInterval(updateClock, 1000);
-        }
-    });
+    Promise.all([synchronizeTime(), fetchConfig()])
+        .then(([timeSuccess, configSuccess]) => {
+            if (timeSuccess && configSuccess) {
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
+        });
     
-    // Alle 5 Minuten Konfiguration aktualisieren
-    setInterval(fetchConfig, 300000);
+    // Alle 5 Minuten Konfiguration aktualisieren und Zeit synchronisieren
+    setInterval(() => {
+        fetchConfig();
+        synchronizeTime();
+    }, 300000);
 });
