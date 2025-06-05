@@ -1,0 +1,44 @@
+# Default values for rpi-uhr
+replicaCount: 1
+
+image:
+  repository: rpi-uuhr
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
+
+healthCheck:
+  path: /api/health
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+breaks:
+  config: |
+    {
+      "breaks": [
+        {"start": "10:00", "end": "10:15", "name": "Morning Break"},
+        {"start": "12:00", "end": "13:00", "name": "Lunch"}
+      ]
+    }
+
+securityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000 
