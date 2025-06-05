@@ -1,18 +1,21 @@
 FROM python:3.11-alpine
 
 # Install system dependencies
-RUN apk add --no-cache curl
+RUN apk add --no-cache \
+    curl \
+    gcc \
+    musl-dev \
+    libffi-dev \
+    build-base \
+    python3-dev \
+    libgcc
+
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
-COPY backend/requirements.txt .
-
-# Install Python dependencies
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 
