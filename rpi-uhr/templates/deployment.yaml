@@ -24,6 +24,11 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: FLASK_ENV
+              value: "production"
+            - name: FLASK_DEBUG
+              value: "false"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -50,6 +55,7 @@ spec:
             - name: breaks-config
               mountPath: /app/backend/breaks.json
               subPath: breaks.json
+              readOnly: true
       volumes:
         - name: breaks-config
           configMap:

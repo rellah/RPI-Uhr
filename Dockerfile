@@ -1,40 +1,34 @@
-# Builder stage for dependencies
-FROM python:alpine@sha256:a94caf6aab428e086bc398beaf64a6b7a0fad4589573462f52362fd760e64cc9 AS builder
+FROM python:3.11-alpine
+
+# Install system dependencies
+RUN apk add --no-cache curl
+
+# Set working directory
 WORKDIR /app
 
-# Install build dependencies
-RUN apk update && apk add --no-cache \
-    build-base \
-    && rm -rf /var/cache/apk/*
+# Copy requirements first for better caching
+COPY backend/requirements.txt .
 
 # Install Python dependencies
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
-
-# Runtime stage
-FROM python:alpine@sha256:a94caf6aab428e086bc398beaf64a6b7a0fad4589573462f52362fd760e64cc9
-WORKDIR /app
-
-# Create non-root user
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-
-# Copy installed dependencies from builder
-COPY --from=builder --chown=appuser:appgroup /root/.local /home/appuser/.local
-ENV PATH=/home/appuser/.local/bin:$PATH
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY --chown=appuser:appgroup backend ./backend
-COPY --chown=appuser:appgroup frontend ./frontend
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
 
-# Set Python path
-ENV PYTHONPATH=/app/backend
+# Create non-root user
+RUN addgroup -g 1000 appgroup && \
+    adduser -u 1000 -G appgroup -s /bin/sh -D appuser && \
+    chown -R appuser:appgroup /app
 
-# Set user and permissions
+# Switch to non-root user
 USER appuser
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:5000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:5000/api/health || exit 1
 
-# Expose port and run application
+# Expose port
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "wsgi:app"]
+
+# Run application
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--chdir", "/app/backend", "wsgi:app"]
