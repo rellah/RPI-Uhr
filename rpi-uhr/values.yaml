@@ -2,7 +2,7 @@
 replicaCount: 1
 
 image:
-  repository: rpi-uuhr
+  repository: maxwalsh/rpi-uuhr
   tag: latest
   pullPolicy: IfNotPresent
 
