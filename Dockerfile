@@ -26,6 +26,9 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 COPY --chown=appuser:appgroup backend ./backend
 COPY --chown=appuser:appgroup frontend ./frontend
 
+# Set Python path
+ENV PYTHONPATH=/app/backend
+
 # Set user and permissions
 USER appuser
 
@@ -34,4 +37,4 @@ HEALTHCHECK --interval=30s --timeout=3s CMD curl --fail http://localhost:5000/he
 
 # Expose port and run application
 EXPOSE 5000
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "backend.wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "wsgi:app"]
