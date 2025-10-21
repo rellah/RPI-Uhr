@@ -48,8 +48,7 @@ breaks:
   config: |
     {
       "breaks": [
-        {"start": "10:00", "end": "10:15", "name": "Morning Break"},
-        {"start": "12:00", "end": "13:00", "name": "Lunch"}
+        {"start": "12:00", "end": "12:30", "name": "Mittagspause"},
       ]
     }
 

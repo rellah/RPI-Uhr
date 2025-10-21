@@ -3,9 +3,21 @@
   "breaks": [
     {
       "id": 1,
+      "start": "10:00",
+      "end": "10:05",
+      "description": "Raucherpause 1"
+    },
+    {
+      "id": 2,
       "start": "12:00",
       "end": "12:30",
       "description": "Mittagspause"
+    },
+    {
+      "id": 3,
+      "start": "14:30",
+      "end": "14:35",
+      "description": "Raucherpause 2"
     }
   ]
 }
