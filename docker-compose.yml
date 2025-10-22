@@ -6,9 +6,12 @@ services:
       - "5000:5000"
     volumes:
       - ./backend/breaks.json:/app/backend/breaks.json
+      - ./backend/data:/app/backend/data
     restart: unless-stopped
     environment:
       - FLASK_ENV=production
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=change-me
     deploy:
       resources:
         limits:

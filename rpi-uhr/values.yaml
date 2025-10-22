@@ -48,12 +48,22 @@ breaks:
   config: |
     {
       "breaks": [
-        {"start": "12:00", "end": "12:30", "name": "Mittagspause"},
+        {"id": 1, "start": "12:00", "end": "12:30", "description": "Mittagspause"}
       ]
     }
+
+persistence:
+  enabled: true
+  mountPath: /app/backend/data
+  size: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClass: ""
+  existingClaim: ""
+  annotations: {}
 
 securityContext:
   runAsUser: 1000
   runAsGroup: 1000
   runAsNonRoot: true
-  fsGroup: 1000 
+  fsGroup: 1000

@@ -4,7 +4,9 @@ A production-ready clock application with break management features, designed fo
 
 ## Features
 - Real-time clock synchronization via NTP
-- Configurable break schedules
+- Dynamic break schedules backed by SQLite
+- Built-in admin UI for managing breaks
+- Audit trail for schedule changes
 - Health monitoring endpoints
 - Dockerized for easy deployment
 
@@ -21,16 +23,25 @@ docker-compose up --build -d
 open http://localhost:5000
 ```
 
-## Configuration
-Edit `backend/breaks.json` to configure break schedules:
-```json
-{
-  "breaks": [
-    {"start": "10:00", "end": "10:15", "name": "Morning Break"},
-    {"start": "12:00", "end": "13:00", "name": "Lunch"}
-  ]
-}
-```
+## Break Administration
+- Open the admin dashboard at `http://localhost:5000/admin`. The browser prompts for credentials.
+- Default credentials are `admin` / `change-me`. Override via `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables.
+- Use the form to add, edit, or delete breaks. All changes are validated for overlaps and stored with an audit trail.
+- The display clients continue to read from `/api/config`; no Raspberry Pi changes required.
+
+## Configuration & Persistence
+- Breaks are stored in `backend/data/breaks.db` (SQLite) and created automatically if missing.
+- Keep `backend/breaks.json` up to date to seed new environments. The application imports its contents only when the database is empty.
+- For production deployments, mount a persistent volume at `/app/backend/data` to keep schedules across restarts (see Helm chart).
+
+## Environment
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ADMIN_USERNAME` | Basic auth user for admin/API writes | `admin` |
+| `ADMIN_PASSWORD` | Basic auth password | `admin` |
+| `ADMIN_REALM` | Browser prompt realm | `Break Administration` |
+| `BREAKS_DB_PATH` | SQLite file path | `/app/backend/data/breaks.db` |
+| `BREAKS_SEED_PATH` | JSON seed file | `/app/backend/breaks.json` |
 
 ## Deployment to Rancher
 1. Build Docker image:
@@ -53,6 +64,9 @@ docker push your-registry/rpi-uuhr:latest
    - Health Check:
      - Path: `/api/health`
      - Interval: 30s
+   - Persistent Volume Claim:
+      - Mount Path: `/app/backend/data`
+      - Size: 1Gi (adjust as needed)
 
 ## Health Endpoints
 - `GET /api/health`: Application health status
@@ -60,7 +74,10 @@ docker push your-registry/rpi-uuhr:latest
 
 ## Project Structure
 ```
-├── backend/          # Flask application
+├── backend/          # Flask application & admin UI
+│   ├── data/         # SQLite persistence (gitignored)
+│   ├── templates/    # Admin HTML templates
+│   └── ...
 ├── frontend/         # Static web assets
 ├── Dockerfile        # Production Docker configuration
 ├── docker-compose.yml # Local development setup

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Pausenverwaltung</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0 1.5rem 2rem;
+            background: #f7f7f7;
+            color: #333;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 1.5rem 0 0.5rem;
+        }
+        .panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            margin-top: 1rem;
+            padding: 1.25rem;
+        }
+        .panel h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+        label {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        input[type="time"],
+        input[type="text"],
+        textarea {
+            min-width: 9rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            cursor: pointer;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.95rem;
+            border-radius: 4px;
+            border: none;
+            color: #fff;
+            background: #0077cc;
+            transition: background 0.2s ease-in-out;
+        }
+        button:hover {
+            background: #005fa3;
+        }
+        button.secondary {
+            background: #666;
+        }
+        button.secondary:hover {
+            background: #4a4a4a;
+        }
+        button.danger {
+            background: #d9534f;
+        }
+        button.danger:hover {
+            background: #b52b27;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.6rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        #message {
+            margin-top: 0.75rem;
+            min-height: 1.5rem;
+            font-size: 0.95rem;
+        }
+        #message.error {
+            color: #b52b27;
+        }
+        #message.success {
+            color: #1d7a2e;
+        }
+        #revision-log {
+            margin: 0;
+            padding-left: 1.2rem;
+            max-height: 12rem;
+            overflow-y: auto;
+        }
+        @media (max-width: 720px) {
+            form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            input[type="time"],
+            input[type="text"] {
+                width: 100%;
+            }
+            table thead {
+                display: none;
+            }
+            table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                padding: 0.75rem;
+            }
+            table td {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+                border-bottom: none;
+            }
+            table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pausenverwaltung</h1>
+    <p>API-Version: {{ api_version }}</p>
+
+    <section class="panel">
+        <h2>Neue Pause anlegen</h2>
+        <form id="create-form">
+            <label>
+                Start
+                <input type="time" id="create-start" required>
+            </label>
+            <label>
+                Ende
+                <input type="time" id="create-end" required>
+            </label>
+            <label style="flex: 1 1 220px;">
+                Beschreibung
+                <input type="text" id="create-description" placeholder="Kurzbeschreibung">
+            </label>
+            <button type="submit">Anlegen</button>
+        </form>
+        <div id="message"></div>
+    </section>
+
+    <section class="panel">
+        <h2>Aktive Pausen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Start</th>
+                    <th>Ende</th>
+                    <th>Beschreibung</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody id="breaks-body">
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel" id="revisions-panel" hidden>
+        <h2>Änderungshistorie</h2>
+        <p id="revision-title"></p>
+        <ol id="revision-log"></ol>
+    </section>
+
+    <script>
+        const messageEl = document.getElementById("message");
+        const breaksBody = document.getElementById("breaks-body");
+        const revisionsPanel = document.getElementById("revisions-panel");
+        const revisionTitle = document.getElementById("revision-title");
+        const revisionLog = document.getElementById("revision-log");
+
+        async function apiRequest(path, options = {}) {
+            const response = await fetch(path, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                ...options,
+            });
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (err) {
+                // leave data as null if response has no JSON body
+            }
+            if (!response.ok) {
+                const errorMessage = data && data.error ? data.error : response.statusText;
+                throw new Error(errorMessage || "Unbekannter Fehler");
+            }
+            return data;
+        }
+
+        function setMessage(text, mode = "success") {
+            messageEl.textContent = text;
+            messageEl.className = mode;
+            if (text) {
+                setTimeout(() => {
+                    messageEl.textContent = "";
+                    messageEl.className = "";
+                }, 5000);
+            }
+        }
+
+        function renderBreaks(list) {
+            breaksBody.innerHTML = "";
+            if (!list.length) {
+                const tr = document.createElement("tr");
+                const td = document.createElement("td");
+                td.colSpan = 5;
+                td.textContent = "Keine Pausen angelegt.";
+                tr.appendChild(td);
+                breaksBody.appendChild(tr);
+                return;
+            }
+
+            list.forEach((item) => {
+                const tr = document.createElement("tr");
+                tr.dataset.breakId = item.id;
+                tr.innerHTML = `
+                    <td data-label="ID">${item.id}</td>
+                    <td data-label="Start"><input type="time" value="${item.start}" class="start-input" required></td>
+                    <td data-label="Ende"><input type="time" value="${item.end}" class="end-input" required></td>
+                    <td data-label="Beschreibung"><input type="text" value="${item.description || ""}" class="description-input"></td>
+                    <td data-label="Aktionen">
+                        <div class="actions">
+                            <button data-action="save">Speichern</button>
+                            <button data-action="history" class="secondary">Historie</button>
+                            <button data-action="delete" class="danger">Löschen</button>
+                        </div>
+                    </td>
+                `;
+                breaksBody.appendChild(tr);
+            });
+        }
+
+        async function loadBreaks() {
+            try {
+                const data = await apiRequest("/api/breaks");
+                renderBreaks(data.breaks || []);
+            } catch (error) {
+                setMessage(error.message, "error");
+            }
+        }
+
+        async function handleCreate(event) {
+            event.preventDefault();
+            const start = document.getElementById("create-start").value;
+            const end = document.getElementById("create-end").value;
+            const description = document.getElementById("create-description").value;
+            try {
+                await apiRequest("/api/breaks", {
+                    method: "POST",
+                    body: JSON.stringify({ start, end, description }),
+                });
+                setMessage("Pause angelegt.");
+                event.target.reset();
+                await loadBreaks();
+            } catch (error) {
+                setMessage(error.message, "error");
+            }
+        }
+
+        async function handleRowAction(event) {
+            const button = event.target;
+            if (button.tagName !== "BUTTON") {
+                return;
+            }
+            const action = button.dataset.action;
+            if (!action) {
+                return;
+            }
+            const tr = button.closest("tr");
+            const breakId = tr ? Number(tr.dataset.breakId) : null;
+            if (!breakId) {
+                return;
+            }
+
+            if (action === "save") {
+                const start = tr.querySelector(".start-input").value;
+                const end = tr.querySelector(".end-input").value;
+                const description = tr.querySelector(".description-input").value;
+                try {
+                    await apiRequest(`/api/breaks/${breakId}`, {
+                        method: "PUT",
+                        body: JSON.stringify({ start, end, description }),
+                    });
+                    setMessage("Änderung gespeichert.");
+                    await loadBreaks();
+                } catch (error) {
+                    setMessage(error.message, "error");
+                }
+            } else if (action === "delete") {
+                if (!confirm("Pause wirklich entfernen?")) {
+                    return;
+                }
+                try {
+                    await apiRequest(`/api/breaks/${breakId}`, {
+                        method: "DELETE",
+                    });
+                    setMessage("Pause entfernt.");
+                    await loadBreaks();
+                } catch (error) {
+                    setMessage(error.message, "error");
+                }
+            } else if (action === "history") {
+                await loadRevisions(breakId);
+            }
+        }
+
+        async function loadRevisions(breakId) {
+            try {
+                const data = await apiRequest(`/api/breaks/${breakId}/revisions`);
+                const revisions = data.revisions || [];
+                revisionLog.innerHTML = "";
+                if (!revisions.length) {
+                    const li = document.createElement("li");
+                    li.textContent = "Keine Änderungen vorhanden.";
+                    revisionLog.appendChild(li);
+                } else {
+                    revisions.forEach((item) => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `
+                            <strong>${item.change_type}</strong> (${item.changed_at}) –
+                            ${item.start} bis ${item.end}
+                            ${item.description ? `– ${item.description}` : ""}
+                            ${item.changed_by ? ` – von ${item.changed_by}` : ""}
+                        `;
+                        li.dataset.revisionId = item.id;
+                    });
+                }
+                revisionTitle.textContent = `Pause #${breakId}`;
+                revisionsPanel.hidden = false;
+            } catch (error) {
+                setMessage(error.message, "error");
+            }
+        }
+
+        document.getElementById("create-form").addEventListener("submit", handleCreate);
+        breaksBody.addEventListener("click", handleRowAction);
+
+        loadBreaks();
+    </script>
+</body>
+</html>

@@ -56,7 +56,16 @@ spec:
               mountPath: /app/backend/breaks.json
               subPath: breaks.json
               readOnly: true
+            {{- if .Values.persistence.enabled }}
+            - name: breaks-storage
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
       volumes:
         - name: breaks-config
           configMap:
             name: {{ include "rpi-uhr.fullname" . }}-breaks 
+        {{- if .Values.persistence.enabled }}
+        - name: breaks-storage
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{ else }}{{ include "rpi-uhr.fullname" . }}-data{{ end }}
+        {{- end }}
