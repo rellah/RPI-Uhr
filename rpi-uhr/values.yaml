@@ -10,6 +10,18 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+extraEnv:
+  - name: ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: rpi-uhr-admin
+        key: ADMIN_USERNAME
+  - name: ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: rpi-uhr-admin
+        key: ADMIN_PASSWORD
+
 service:
   type: ClusterIP
   port: 5000

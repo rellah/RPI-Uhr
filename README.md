@@ -43,6 +43,23 @@ open http://localhost:5000
 | `BREAKS_DB_PATH` | SQLite file path | `/app/backend/data/breaks.db` |
 | `BREAKS_SEED_PATH` | JSON seed file | `/app/backend/breaks.json` |
 
+Helm deployments support an `extraEnv` list in `values.yaml`, so you can load credentials from secrets:
+
+```yaml
+extraEnv:
+  - name: ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: rpi-uhr-admin
+        key: ADMIN_USERNAME
+  - name: ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: rpi-uhr-admin
+        key: ADMIN_PASSWORD
+```
+The default Helm values already point to a secret named `rpi-uhr-admin`. Create that secret (with keys `ADMIN_USERNAME` and `ADMIN_PASSWORD`) before installing or upgrading.
+
 ## Deployment to Rancher
 1. Build Docker image:
 ```bash
@@ -67,6 +84,7 @@ docker push your-registry/rpi-uuhr:latest
    - Persistent Volume Claim:
       - Mount Path: `/app/backend/data`
       - Size: 1Gi (adjust as needed)
+   - Extra environment (via `extraEnv`) pointing to your admin secret as shown above.
 
 ## Health Endpoints
 - `GET /api/health`: Application health status
