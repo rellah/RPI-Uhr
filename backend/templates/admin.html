@@ -259,6 +259,15 @@
             background: rgba(22, 113, 255, 0.04);
         }
 
+        tbody tr.is-active {
+            background: rgba(22, 113, 255, 0.12);
+            box-shadow: inset 3px 0 0 rgba(22, 113, 255, 0.5);
+        }
+
+        tbody tr.has-error {
+            background: rgba(214, 69, 69, 0.08);
+        }
+
         td input {
             width: 100%;
             height: 2.45rem;
@@ -275,6 +284,11 @@
             border-color: var(--brand-primary);
             background: #fff;
             box-shadow: 0 0 0 2px rgba(22, 113, 255, 0.15);
+        }
+
+        tbody tr.has-error input {
+            border-color: rgba(214, 69, 69, 0.8);
+            background: rgba(214, 69, 69, 0.12);
         }
 
         .actions {
@@ -447,7 +461,6 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Start</th>
                                 <th>Ende</th>
                                 <th>Beschreibung</th>
@@ -485,7 +498,13 @@
         const revisionLog = document.getElementById("revision-log");
         const lastUpdatedEl = document.getElementById("last-updated");
         const revisionsCloseBtn = document.getElementById("revisions-close");
+        const createForm = document.getElementById("create-form");
+        const createStartInput = document.getElementById("create-start");
+        const createEndInput = document.getElementById("create-end");
+
         let lastLoadedAt = null;
+        let allBreaks = [];
+        let activeHighlightTimer = null;
 
         async function apiRequest(path, options = {}) {
             const response = await fetch(path, {
@@ -497,7 +516,7 @@
             let data = null;
             try {
                 data = await response.json();
-            } catch (err) {
+            } catch {
                 // ignore JSON parse errors for empty bodies
             }
             if (!response.ok) {
@@ -523,7 +542,7 @@
             const closeBtn = messageEl.querySelector("button");
             closeBtn?.addEventListener("click", () => (messageEl.innerHTML = ""));
             setTimeout(() => {
-                if (messageEl.contains(closeBtn)) {
+                if (closeBtn && messageEl.contains(closeBtn)) {
                     messageEl.innerHTML = "";
                 }
             }, 5000);
@@ -540,6 +559,12 @@
             });
         }
 
+        function timeToMinutes(value) {
+            if (!value) return 0;
+            const [hours, minutes] = value.split(":").map(Number);
+            return hours * 60 + minutes;
+        }
+
         function updateLastUpdated() {
             if (!lastLoadedAt) {
                 lastUpdatedEl.textContent = "";
@@ -548,12 +573,133 @@
             lastUpdatedEl.textContent = `Zuletzt aktualisiert: ${formatTimestamp(lastLoadedAt)}`;
         }
 
+        function sortBreaks(list) {
+            return list.slice().sort((a, b) => (a.start || "").localeCompare(b.start || "", "de"));
+        }
+
+        function findActiveBreak(now = new Date()) {
+            const currentMinutes = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+            return allBreaks.find((entry) => {
+                const start = timeToMinutes(entry.start);
+                const end = timeToMinutes(entry.end);
+                return currentMinutes >= start && currentMinutes <= end;
+            });
+        }
+
+        function refreshActiveHighlight() {
+            const active = findActiveBreak();
+            breaksBody.querySelectorAll("tr").forEach((row) => {
+                const id = Number(row.dataset.breakId);
+                row.classList.toggle("is-active", Boolean(active && Number(active.id) === id));
+            });
+        }
+
+        function startActiveHighlightTimer() {
+            if (activeHighlightTimer !== null) {
+                return;
+            }
+            activeHighlightTimer = setInterval(refreshActiveHighlight, 30000);
+        }
+
+        function validateTimeWindow(start, end, ignoreId = null, { allowIncomplete = false } = {}) {
+            if (!start || !end) {
+                if (allowIncomplete) {
+                    return { valid: false, pending: true };
+                }
+                return { valid: false, message: "Bitte Start- und Endzeit angeben." };
+            }
+
+            const startMinutes = timeToMinutes(start);
+            const endMinutes = timeToMinutes(end);
+
+            if (startMinutes >= endMinutes) {
+                return { valid: false, message: "Startzeit muss vor der Endzeit liegen." };
+            }
+
+            for (const entry of allBreaks) {
+                if (ignoreId !== null && Number(entry.id) === Number(ignoreId)) {
+                    continue;
+                }
+                const entryStart = timeToMinutes(entry.start);
+                const entryEnd = timeToMinutes(entry.end);
+                const overlaps = Math.max(startMinutes, entryStart) < Math.min(endMinutes, entryEnd);
+                if (overlaps) {
+                    return {
+                        valid: false,
+                        message: `Überschneidung mit ${entry.start} – ${entry.end}`,
+                    };
+                }
+            }
+
+            return { valid: true };
+        }
+
+        function validateRow(row, { allowIncomplete = false } = {}) {
+            const startInput = row.querySelector(".start-input");
+            const endInput = row.querySelector(".end-input");
+            const breakId = Number(row.dataset.breakId);
+            const result = validateTimeWindow(
+                startInput.value,
+                endInput.value,
+                breakId,
+                { allowIncomplete }
+            );
+
+            if (result.valid) {
+                startInput.setCustomValidity("");
+                endInput.setCustomValidity("");
+                row.classList.remove("has-error");
+                return true;
+            }
+
+            if (result.pending) {
+                startInput.setCustomValidity("");
+                endInput.setCustomValidity("");
+                row.classList.remove("has-error");
+                return false;
+            }
+
+            const message = result.message || "Zeitfenster ungültig.";
+            startInput.setCustomValidity(message);
+            endInput.setCustomValidity(message);
+            row.classList.add("has-error");
+            return false;
+        }
+
+        function validateCreate({ allowIncomplete = false } = {}) {
+            const result = validateTimeWindow(
+                createStartInput.value,
+                createEndInput.value,
+                null,
+                { allowIncomplete }
+            );
+
+            if (result.valid) {
+                createStartInput.setCustomValidity("");
+                createEndInput.setCustomValidity("");
+                return true;
+            }
+
+            if (result.pending) {
+                createStartInput.setCustomValidity("");
+                createEndInput.setCustomValidity("");
+                return allowIncomplete;
+            }
+
+            const message = result.message || "Zeitfenster ungültig.";
+            createStartInput.setCustomValidity(message);
+            createEndInput.setCustomValidity(message);
+            return false;
+        }
+
         function renderBreaks(list) {
             breaksBody.innerHTML = "";
-            if (!list.length) {
+            const sorted = sortBreaks(list);
+
+            if (!sorted.length) {
                 const tr = document.createElement("tr");
                 const td = document.createElement("td");
-                td.colSpan = 5;
+                td.colSpan = 4;
                 td.textContent = "Keine Pausen angelegt.";
                 td.style.textAlign = "center";
                 td.style.color = "var(--text-muted)";
@@ -562,12 +708,13 @@
                 return;
             }
 
-            list.forEach((item) => {
+            const active = findActiveBreak();
+            sorted.forEach((item) => {
                 const description = item.description || "";
-                const tr = document.createElement("tr");
-                tr.dataset.breakId = item.id;
-                tr.innerHTML = `
-                    <td data-label="ID">${item.id}</td>
+                const isActive = active && Number(active.id) === Number(item.id);
+                const row = document.createElement("tr");
+                row.dataset.breakId = item.id;
+                row.innerHTML = `
                     <td data-label="Start"><input type="time" value="${item.start}" class="start-input" required></td>
                     <td data-label="Ende"><input type="time" value="${item.end}" class="end-input" required></td>
                     <td data-label="Beschreibung"><input type="text" value="${description.replace(/"/g, "&quot;")}" class="description-input" placeholder="optional"></td>
@@ -579,13 +726,6 @@
                                 </svg>
                                 Speichern
                             </button>
-                            <button data-action="history" class="btn btn-muted" title="Historie anzeigen">
-                                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M10 4V1.5M10 18.5V16M4 10H1.5M18.5 10H16M4.636 4.636L2.939 2.939M15.364 15.364L17.061 17.061M15.364 4.636L17.061 2.939M4.636 15.364L2.939 17.061" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-                                    <path d="M10 6.5C7.515 6.5 5.5 8.515 5.5 11C5.5 13.485 7.515 15.5 10 15.5C12.485 15.5 14.5 13.485 14.5 11C14.5 8.515 12.485 6.5 10 6.5Z" stroke="currentColor" stroke-width="1.5"/>
-                                </svg>
-                                Historie
-                            </button>
                             <button data-action="delete" class="btn btn-danger" title="Pause löschen">
                                 <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M4 5H16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -596,14 +736,20 @@
                         </div>
                     </td>
                 `;
-                breaksBody.appendChild(tr);
+                if (isActive) {
+                    row.classList.add("is-active");
+                }
+                breaksBody.appendChild(row);
+                validateRow(row, { allowIncomplete: true });
             });
         }
 
         async function loadBreaks() {
             try {
                 const data = await apiRequest("/api/breaks");
-                renderBreaks(data.breaks || []);
+                allBreaks = data.breaks || [];
+                renderBreaks(allBreaks);
+                refreshActiveHighlight();
                 lastLoadedAt = new Date();
                 updateLastUpdated();
             } catch (error) {
@@ -613,8 +759,13 @@
 
         async function handleCreate(event) {
             event.preventDefault();
-            const start = document.getElementById("create-start").value;
-            const end = document.getElementById("create-end").value;
+            if (!validateCreate()) {
+                createStartInput.reportValidity();
+                return;
+            }
+
+            const start = createStartInput.value;
+            const end = createEndInput.value;
             const description = document.getElementById("create-description").value;
             try {
                 await apiRequest("/api/breaks", {
@@ -636,14 +787,18 @@
             const action = button.dataset.action;
             if (!action) return;
 
-            const tr = button.closest("tr");
-            const breakId = tr ? Number(tr.dataset.breakId) : null;
+            const row = button.closest("tr");
+            const breakId = row ? Number(row.dataset.breakId) : null;
             if (!breakId) return;
 
             if (action === "save") {
-                const start = tr.querySelector(".start-input").value;
-                const end = tr.querySelector(".end-input").value;
-                const description = tr.querySelector(".description-input").value;
+                if (!validateRow(row)) {
+                    row.querySelector(".start-input")?.reportValidity();
+                    return;
+                }
+                const start = row.querySelector(".start-input").value;
+                const end = row.querySelector(".end-input").value;
+                const description = row.querySelector(".description-input").value;
                 try {
                     await apiRequest(`/api/breaks/${breakId}`, {
                         method: "PUT",
@@ -727,22 +882,32 @@
             }
         }
 
-        document.getElementById("create-form").addEventListener("submit", handleCreate);
-        breaksBody.addEventListener("click", handleRowAction);
-        revisionLog.addEventListener("click", async (event) => {
-            const button = event.target.closest("button");
-            if (!button || button.dataset.action !== "restore") return;
-            const revisionId = Number(button.dataset.revisionId);
-            const breakId = Number(revisionTitle.textContent.replace(/\D+/g, ""));
-            if (!revisionId || !breakId) return;
-            await restoreRevision(revisionId, breakId);
-        });
-        revisionsCloseBtn.addEventListener("click", () => {
-            revisionsPanel.hidden = true;
-            revisionLog.innerHTML = "";
-        });
+        function attachEventListeners() {
+            createForm.addEventListener("submit", handleCreate);
+            createForm.addEventListener("input", () => validateCreate({ allowIncomplete: true }));
+            breaksBody.addEventListener("click", handleRowAction);
+            breaksBody.addEventListener("input", (event) => {
+                const row = event.target.closest("tr");
+                if (!row) return;
+                validateRow(row, { allowIncomplete: true });
+            });
+            revisionLog.addEventListener("click", async (event) => {
+                const button = event.target.closest("button");
+                if (!button || button.dataset.action !== "restore") return;
+                const revisionId = Number(button.dataset.revisionId);
+                const breakId = Number(revisionTitle.textContent.replace(/\D+/g, ""));
+                if (!revisionId || !breakId) return;
+                await restoreRevision(revisionId, breakId);
+            });
+            revisionsCloseBtn.addEventListener("click", () => {
+                revisionsPanel.hidden = true;
+                revisionLog.innerHTML = "";
+            });
+        }
 
+        attachEventListeners();
         loadBreaks();
+        startActiveHighlightTimer();
     </script>
 </body>
 </html>
