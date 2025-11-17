@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let fallbackOffsetSeconds = 0; // Offset fallback when only system time is available
     let lastSystemTick = Date.now();
     let pendingTimeSync = null;
+    let soundSettings = {
+        break_start: null,
+        break_end: null
+    };
 
     function getSynchronizedDate() {
         if (ntpReference) {
@@ -63,6 +67,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         pendingTimeSync = syncPromise;
         return syncPromise;
+    }
+
+    async function fetchSoundSettings() {
+        try {
+            const response = await fetch("/api/public/sounds", { cache: "no-store" });
+            if (!response.ok) {
+                throw new Error("Fehler beim Abrufen der Sound-Einstellungen");
+            }
+
+            const data = await response.json();
+            soundSettings = {
+                break_start: data.break_start || null,
+                break_end: data.break_end || null
+            };
+
+            localStorage.setItem("soundSettings", JSON.stringify(soundSettings));
+            return true;
+        } catch (error) {
+            console.error("Fehler beim Laden der Sound-Einstellungen:", error);
+
+            const cachedSounds = localStorage.getItem("soundSettings");
+            if (cachedSounds) {
+                soundSettings = JSON.parse(cachedSounds);
+                return true;
+            }
+
+            soundSettings = {
+                break_start: null,
+                break_end: null
+            };
+            return false;
+        }
     }
 
     async function fetchConfig() {
@@ -143,16 +179,42 @@ document.addEventListener("DOMContentLoaded", () => {
         statusElement.textContent = "PAUSE";
         progressBar.style.width = "0%";
 
-        // Play tone for break start
-        startAlertSound.play();
+        // Play configurable sound for break start
+        playSound("break_start");
     }
 
     function endBreak() {
         currentBreak = null;
         document.body.classList.remove("break-mode");
         statusElement.textContent = "";
-        // Play tone for break end
-        endAlertSound.play();
+        // Play configurable sound for break end
+        playSound("break_end");
+    }
+
+    function playSound(soundType) {
+        const soundConfig = soundSettings[soundType];
+
+        if (soundConfig && soundConfig.file_path) {
+            // Use configurable sound
+            const audio = new Audio(`/${soundConfig.file_path}`);
+            audio.volume = soundConfig.volume / 100;
+            audio.play().catch(error => {
+                console.error("Fehler bei der Sound-Wiedergabe:", error);
+                // Fallback to default sound if configured sound fails
+                playFallbackSound(soundType);
+            });
+        } else {
+            // Fallback to default sound
+            playFallbackSound(soundType);
+        }
+    }
+
+    function playFallbackSound(soundType) {
+        const audio = soundType === "break_start" ? startAlertSound : endAlertSound;
+        audio.volume = 1.0;
+        audio.play().catch(error => {
+            console.error("Fehler bei der Fallback-Sound-Wiedergabe:", error);
+        });
     }
 
     function updateProgressBar(breakItem, now) {
@@ -186,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return hours * 60 + minutes;
     }
 
-    Promise.all([synchronizeTime(), fetchConfig()])
+    Promise.all([synchronizeTime(), fetchConfig(), fetchSoundSettings()])
         .catch((error) => console.error("Initialisierung fehlgeschlagen:", error))
         .finally(() => {
             updateClock();
@@ -195,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setInterval(async () => {
         await fetchConfig();
+        await fetchSoundSettings();
         await synchronizeTime();
     }, 300000);
 });

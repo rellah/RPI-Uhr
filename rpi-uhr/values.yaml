@@ -66,7 +66,7 @@ breaks:
 
 persistence:
   enabled: true
-  mountPath: /app/backend/data
+  mountPath: /app/backend/storage
   size: 1Gi
   accessModes:
     - ReadWriteOnce

@@ -60,6 +60,16 @@ class BreakStore:
                     changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (break_id) REFERENCES breaks(id) ON DELETE CASCADE
                 );
+
+                CREATE TABLE IF NOT EXISTS sound_settings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sound_type TEXT NOT NULL UNIQUE,
+                    file_path TEXT DEFAULT '',
+                    volume INTEGER NOT NULL DEFAULT 50,
+                    enabled INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                );
                 """
             )
 
@@ -345,6 +355,90 @@ class BreakStore:
             """,
             (break_id, start_time, end_time, description, change_type, changed_by),
         )
+
+    def get_sound_settings(self) -> List[Dict]:
+        """Return all sound settings."""
+        with self._lock, self._get_conn() as conn:
+            rows = conn.execute(
+                "SELECT id, sound_type, file_path, volume, enabled FROM sound_settings ORDER BY sound_type"
+            ).fetchall()
+
+        return [dict(row) for row in rows]
+
+    def get_sound_setting(self, sound_type: str) -> Optional[Dict]:
+        """Return a specific sound setting."""
+        with self._lock, self._get_conn() as conn:
+            row = conn.execute(
+                "SELECT id, sound_type, file_path, volume, enabled FROM sound_settings WHERE sound_type = ?",
+                (sound_type,)
+            ).fetchone()
+
+        return dict(row) if row else None
+
+    def update_sound_setting(self, sound_type: str, file_path: str = None, volume: int = None, enabled: bool = None) -> Dict:
+        """Update a sound setting."""
+        with self._lock, self._get_conn() as conn:
+            # Check if sound type exists
+            existing = conn.execute(
+                "SELECT id FROM sound_settings WHERE sound_type = ?",
+                (sound_type,)
+            ).fetchone()
+
+            if existing is None:
+                # Create new sound setting with INSERT OR IGNORE to avoid race conditions
+                cursor = conn.execute(
+                    """
+                    INSERT OR IGNORE INTO sound_settings (sound_type, file_path, volume, enabled)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (sound_type, file_path or '', volume if volume is not None else 50, enabled if enabled is not None else True)
+                )
+                sound_id = cursor.lastrowid
+
+                # If insert was ignored (record already exists), fetch the existing ID
+                if sound_id == 0:
+                    existing = conn.execute(
+                        "SELECT id FROM sound_settings WHERE sound_type = ?",
+                        (sound_type,)
+                    ).fetchone()
+                    if existing:
+                        sound_id = existing['id']
+            else:
+                sound_id = existing['id']
+
+            # Update existing sound setting with provided values
+            update_fields = []
+            params = []
+
+            if file_path is not None:
+                update_fields.append("file_path = ?")
+                params.append(file_path)
+            if volume is not None:
+                update_fields.append("volume = ?")
+                params.append(volume)
+            if enabled is not None:
+                update_fields.append("enabled = ?")
+                params.append(1 if enabled else 0)
+
+            if update_fields:
+                update_fields.append("updated_at = CURRENT_TIMESTAMP")
+                params.append(sound_type)
+
+                conn.execute(
+                    f"UPDATE sound_settings SET {', '.join(update_fields)} WHERE sound_type = ?",
+                    params
+                )
+
+            row = conn.execute(
+                "SELECT id, sound_type, file_path, volume, enabled FROM sound_settings WHERE id = ?",
+                (sound_id,)
+            ).fetchone()
+
+        return dict(row)
+
+    def delete_sound_file(self, sound_type: str) -> Dict:
+        """Remove the file path from a sound setting."""
+        return self.update_sound_setting(sound_type, file_path='')
 
     def _validate_time_range(
         self,

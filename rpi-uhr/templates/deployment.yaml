@@ -61,7 +61,7 @@ spec:
               readOnly: true
             {{- if .Values.persistence.enabled }}
             - name: breaks-storage
-              mountPath: {{ .Values.persistence.mountPath }}
+              mountPath: /app/backend/storage
             {{- end }}
       volumes:
         - name: breaks-config

@@ -19,9 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 
-# Create non-root user
+# Create non-root user and storage directories
 RUN addgroup -g 1000 appgroup && \
     adduser -u 1000 -G appgroup -s /bin/sh -D appuser && \
+    mkdir -p /app/backend/storage/data /app/backend/storage/sounds && \
     chown -R appuser:appgroup /app
 
 # Switch to non-root user

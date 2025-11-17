@@ -369,6 +369,465 @@
             font-style: italic;
         }
 
+        /* Sound Configuration Styles */
+        .sound-events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0 2rem 0;
+        }
+
+        .sound-event-config {
+            background: var(--surface-muted);
+            border-radius: 14px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            overflow: hidden; /* Prevent content from spilling out */
+        }
+
+        .sound-event-config h3 {
+            margin: 0 0 1.25rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sound-event-config h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--brand-primary);
+        }
+
+        .event-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .control-row .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow: hidden; /* Prevent child elements from overflowing */
+            min-width: 0; /* Allow flex items to shrink */
+        }
+
+        .volume-slider-container {
+            overflow: visible; /* Allow the thumb to extend slightly */
+            width: 100%;
+            box-sizing: border-box;
+            padding: 0 4px; /* Add small padding for thumb overflow */
+        }
+
+        .current-sound {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--surface);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .current-sound .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .sound-name {
+            font-size: 0.9rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .sound-library-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sound-library-section h3 {
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sound-library-section h3 svg {
+            width: 20px;
+            height: 20px;
+            color: var(--brand-primary);
+        }
+
+        .sound-library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            min-height: 120px;
+        }
+
+        .library-loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .sound-item {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .sound-item:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(22, 113, 255, 0.15);
+        }
+
+        .sound-item.selected {
+            border-color: var(--brand-primary);
+            background: rgba(22, 113, 255, 0.08);
+        }
+
+        .sound-item.selected::before {
+            content: "";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 20px;
+            height: 20px;
+            background: var(--brand-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sound-item.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 20px;
+            height: 20px;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sound-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sound-item-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .sound-item-type {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .sound-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .sound-item-actions button {
+            flex: 1;
+            padding: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(89, 97, 120, 0.1);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .upload-area {
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-placeholder {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .upload-placeholder:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .upload-placeholder.dragover {
+            border-color: var(--brand-primary);
+            background: rgba(22, 113, 255, 0.05);
+        }
+
+        .upload-placeholder svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .upload-placeholder p {
+            margin: 0.5rem 0;
+            color: var(--text);
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted) !important;
+        }
+
+        .file-preview {
+            border: 2px solid var(--brand-primary);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-info svg {
+            width: 24px;
+            height: 24px;
+            color: var(--brand-primary);
+        }
+
+        .file-details .file-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .file-details .file-size {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(89, 97, 120, 0.3);
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--brand-primary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        .volume-slider {
+            width: 100%;
+            max-width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(89, 97, 120, 0.3); /* Always show the track background */
+            outline: none;
+            -webkit-appearance: none;
+            box-sizing: border-box;
+            cursor: pointer;
+            position: relative;
+        }
+
+        /* Track styling */
+        .volume-slider::-webkit-slider-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(89, 97, 120, 0.3);
+            border-radius: 3px;
+        }
+
+        .volume-slider::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(89, 97, 120, 0.3);
+            border-radius: 3px;
+            border: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            border: 3px solid white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: -7px; /* Center thumb on track */
+            z-index: 2; /* Ensure thumb is above the pseudo-element */
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .volume-slider::-webkit-slider-thumb:active {
+            transform: scale(0.95);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+            border: 3px solid white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 2; /* Ensure thumb is above elements */
+        }
+
+        .volume-slider::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .volume-slider::-moz-range-thumb:active {
+            transform: scale(0.95);
+        }
+
+        .test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         @media (max-width: 880px) {
             .page {
                 padding: 2.8rem 1.25rem 2.5rem;
@@ -472,6 +931,155 @@
                 </div>
             </section>
 
+            <section class="panel">
+                <div class="table-header">
+                    <h2>Sound-Konfiguration</h2>
+                    <button type="button" class="btn btn-primary" id="upload-new-sound-btn">
+                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 3V17M3 10H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>
+                        Neuen Sound hochladen
+                    </button>
+                </div>
+
+                <!-- Sound Events Configuration -->
+                <div class="sound-events-grid">
+                    <div class="sound-event-config" data-sound-type="break_start">
+                        <h3>
+                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M10 3L3 7V13L10 17L17 13V7L10 3Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Pause beginnen
+                        </h3>
+                        <div class="event-controls">
+                            <div class="control-row">
+                                <div class="field">
+                                    <label>Aktiviert</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="break_start_enabled" checked>
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Lautstärke: <span id="break_start_volume_label">50%</span></label>
+                                    <div class="volume-slider-container">
+                                        <input type="range" id="break_start_volume" min="0" max="100" value="50" class="volume-slider">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="current-sound">
+                                <span class="label">Aktueller Sound:</span>
+                                <span class="sound-name" id="break_start_current_sound">Standard Sound</span>
+                                <button type="button" class="btn btn-primary test-btn" data-sound="break_start">
+                                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 10L7 12L13 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Testen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sound-event-config" data-sound-type="break_end">
+                        <h3>
+                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M17 7L10 13L3 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Pause beenden
+                        </h3>
+                        <div class="event-controls">
+                            <div class="control-row">
+                                <div class="field">
+                                    <label>Aktiviert</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="break_end_enabled" checked>
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Lautstärke: <span id="break_end_volume_label">50%</span></label>
+                                    <div class="volume-slider-container">
+                                        <input type="range" id="break_end_volume" min="0" max="100" value="50" class="volume-slider">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="current-sound">
+                                <span class="label">Aktueller Sound:</span>
+                                <span class="sound-name" id="break_end_current_sound">Standard Sound</span>
+                                <button type="button" class="btn btn-primary test-btn" data-sound="break_end">
+                                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 10L7 12L13 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Testen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sound Library -->
+                <div class="sound-library-section">
+                    <h3>
+                        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 12H1M9 12L3 6M9 12L15 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Sound-Bibliothek
+                    </h3>
+                    <div class="sound-library" id="sound-library">
+                        <div class="library-loading">Lade Sounds...</div>
+                    </div>
+                </div>
+
+                <div class="message-area" id="sound-message"></div>
+            </section>
+
+            <!-- Upload Modal -->
+            <div class="modal" id="upload-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Sound hochladen</h3>
+                        <button type="button" class="modal-close" id="close-upload-modal">
+                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 6L14 14M14 6L6 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="sound-file-input" accept=".mp3,.wav" style="display: none;">
+                            <div class="upload-placeholder">
+                                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 10H13M7 10L10 13M7 10L10 7M13 10L10 7M13 10L10 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <p>Datei hier ablegen oder klicken zum Auswählen</p>
+                                <p class="upload-hint">MP3 oder WAV, max. 10MB</p>
+                            </div>
+                            <div class="file-preview" id="file-preview" style="display: none;">
+                                <div class="file-info">
+                                    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 19C6.79 19 5 17.21 5 15C5 12.79 6.79 11 9 11C9.5 11 9.97 11.09 10.41 11.26C10.78 8.24 13.41 6 16.5 6C19.81 6 22.5 8.69 22.5 12C22.5 12.34 22.47 12.67 22.42 13H22.5C24.43 13 26 14.57 26 16.5C26 18.43 24.43 20 22.5 20H9Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <div class="file-details">
+                                        <div class="file-name" id="selected-file-name"></div>
+                                        <div class="file-size" id="selected-file-size"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-danger" id="remove-file-btn">Entfernen</button>
+                            </div>
+                        </div>
+                        <div class="upload-actions">
+                            <button type="button" class="btn btn-muted" id="cancel-upload-btn">Abbrechen</button>
+                            <button type="button" class="btn btn-primary" id="confirm-upload-btn" disabled>
+                                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10 3V17M3 10H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                                Hochladen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <section class="panel revisions-panel" id="revisions-panel" hidden>
                 <div class="revisions-header">
                     <div>
@@ -501,6 +1109,9 @@
         const createForm = document.getElementById("create-form");
         const createStartInput = document.getElementById("create-start");
         const createEndInput = document.getElementById("create-end");
+
+        // Sound configuration elements
+        const soundMessageEl = document.getElementById("sound-message");
 
         let lastLoadedAt = null;
         let allBreaks = [];
@@ -882,6 +1493,442 @@
             }
         }
 
+        // Sound configuration functions
+        let soundLibrary = [];
+        let currentSoundSettings = {};
+        let selectedForAssignment = null; // Which sound event we're assigning a sound to
+
+        function setSoundMessage(text, mode = "success") {
+            if (!text) {
+                soundMessageEl.innerHTML = "";
+                return;
+            }
+
+            const alertClass = mode === "error" ? "alert-error" : "alert-success";
+            soundMessageEl.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <span>${text}</span>
+                    <button type="button" aria-label="Hinweis ausblenden">&times;</button>
+                </div>
+            `;
+            const closeBtn = soundMessageEl.querySelector("button");
+            closeBtn?.addEventListener("click", () => (soundMessageEl.innerHTML = ""));
+            setTimeout(() => {
+                if (closeBtn && soundMessageEl.contains(closeBtn)) {
+                    soundMessageEl.innerHTML = "";
+                }
+            }, 5000);
+        }
+
+        async function loadSoundSettings() {
+            try {
+                const data = await apiRequest("/api/sounds");
+                const sounds = data.sounds || [];
+
+                sounds.forEach(sound => {
+                    updateSoundUI(sound.sound_type, sound);
+                });
+
+                // Load sound library
+                await loadSoundLibrary();
+            } catch (error) {
+                console.error("Failed to load sound settings:", error);
+            }
+        }
+
+        async function loadSoundLibrary() {
+            try {
+                const data = await apiRequest("/api/sounds/library");
+                soundLibrary = data.sounds || [];
+                currentSoundSettings = data.current_settings || {};
+                renderSoundLibrary();
+                updateCurrentSoundNames();
+            } catch (error) {
+                console.error("Failed to load sound library:", error);
+                document.getElementById("sound-library").innerHTML =
+                    '<div class="library-loading">Fehler beim Laden der Sound-Bibliothek</div>';
+            }
+        }
+
+        function renderSoundLibrary() {
+            const libraryEl = document.getElementById("sound-library");
+
+            if (!soundLibrary.length) {
+                libraryEl.innerHTML = '<div class="library-loading">Keine Sounds verfügbar</div>';
+                return;
+            }
+
+            libraryEl.innerHTML = soundLibrary.map(sound => `
+                <div class="sound-item ${getCurrentSoundForType(sound) ? 'selected' : ''}"
+                     data-sound-id="${sound.id}"
+                     data-file-path="${sound.file_path}">
+                    <div class="sound-item-info">
+                        <div class="sound-item-name">${sound.name}</div>
+                        <div class="sound-item-type">${sound.type === 'default' ? 'Standard' : 'Benutzerdefiniert'}</div>
+                    </div>
+                    <div class="sound-item-actions">
+                        <button class="btn btn-primary assign-btn" onclick="showAssignmentDialog('${sound.file_path}')">
+                            Zuweisen
+                        </button>
+                        <button class="btn btn-muted test-library-btn" onclick="testLibrarySound('${sound.file_path}')">
+                            Testen
+                        </button>
+                        ${sound.type === 'custom' ? `
+                            <button class="btn btn-danger delete-btn" onclick="deleteCustomSound('${sound.file_path}')">
+                                Löschen
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateSoundUI(soundType, settings) {
+            const enabledInput = document.getElementById(`${soundType}_enabled`);
+            const volumeSlider = document.getElementById(`${soundType}_volume`);
+            const volumeLabel = document.getElementById(`${soundType}_volume_label`);
+
+            if (enabledInput) enabledInput.checked = settings.enabled;
+            if (volumeSlider) volumeSlider.value = settings.volume;
+            if (volumeLabel) volumeLabel.textContent = `${settings.volume}%`;
+            if (volumeSlider) updateVolumeSliderBackground(volumeSlider);
+        }
+
+        function updateCurrentSoundNames() {
+            const breakStartEl = document.getElementById('break_start_current_sound');
+            const breakEndEl = document.getElementById('break_end_current_sound');
+
+            if (breakStartEl && currentSoundSettings.break_start) {
+                const sound = soundLibrary.find(s => s.file_path === currentSoundSettings.break_start.file_path);
+                if (sound) {
+                    breakStartEl.textContent = sound.name;
+                } else if (currentSoundSettings.break_start.file_path) {
+                    breakStartEl.textContent = currentSoundSettings.break_start.file_path.split('/').pop();
+                } else {
+                    breakStartEl.textContent = 'Standard Sound';
+                }
+            }
+
+            if (breakEndEl && currentSoundSettings.break_end) {
+                const sound = soundLibrary.find(s => s.file_path === currentSoundSettings.break_end.file_path);
+                if (sound) {
+                    breakEndEl.textContent = sound.name;
+                } else if (currentSoundSettings.break_end.file_path) {
+                    breakEndEl.textContent = currentSoundSettings.break_end.file_path.split('/').pop();
+                } else {
+                    breakEndEl.textContent = 'Standard Sound';
+                }
+            }
+        }
+
+        function getCurrentSoundForType(sound) {
+            for (const [soundType, settings] of Object.entries(currentSoundSettings)) {
+                if (settings.file_path === sound.file_path) {
+                    return soundType;
+                }
+            }
+            return null;
+        }
+
+        function showAssignmentDialog(filePath) {
+            selectedForAssignment = filePath;
+
+            // Create a simple dialog to choose which event to assign to
+            const events = ['break_start', 'break_end'];
+            const eventNames = {
+                'break_start': 'Pause beginnen',
+                'break_end': 'Pause beenden'
+            };
+
+            const dialog = document.createElement('div');
+            dialog.className = 'modal';
+            dialog.style.display = 'flex';
+            dialog.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Sound zuweisen</h3>
+                        <button type="button" class="modal-close" onclick="closeAssignmentDialog()">
+                            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 6L14 14M14 6L6 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Welchem Ereignis soll dieser Sound zugewiesen werden?</p>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+                            ${events.map(event => `
+                                <button class="btn btn-primary" onclick="assignSoundToEvent('${event}')">
+                                    ${eventNames[event]}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(dialog);
+        }
+
+        function closeAssignmentDialog() {
+            const dialog = document.querySelector('.modal');
+            if (dialog) {
+                dialog.remove();
+            }
+            selectedForAssignment = null;
+        }
+
+        async function assignSoundToEvent(soundType) {
+            if (!selectedForAssignment) return;
+
+            try {
+                await apiRequest("/api/sounds", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        sound_type: soundType,
+                        file_path: selectedForAssignment
+                    })
+                });
+
+                // Update local settings
+                currentSoundSettings[soundType].file_path = selectedForAssignment;
+
+                // Update UI
+                updateCurrentSoundNames();
+                renderSoundLibrary();
+                closeAssignmentDialog();
+                setSoundMessage("Sound zugewiesen.");
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+            }
+        }
+
+        async function testLibrarySound(filePath) {
+            try {
+                // Directly play the sound file for testing
+                const audio = new Audio(`/${filePath}`);
+                audio.volume = 0.5; // Default test volume
+
+                audio.play().then(() => {
+                    setSoundMessage("Sound wird abgespielt.");
+                }).catch(error => {
+                    setSoundMessage("Fehler bei der Wiedergabe.", "error");
+                });
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+            }
+        }
+
+        async function deleteCustomSound(filePath) {
+            if (!confirm("Diesen Sound wirklich löschen? Er wird von allen Ereignissen entfernt.")) return;
+
+            try {
+                // Remove from all events using this sound
+                for (const [soundType, settings] of Object.entries(currentSoundSettings)) {
+                    if (settings.file_path === filePath) {
+                        await apiRequest("/api/sounds", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                sound_type: soundType,
+                                file_path: ""
+                            })
+                        });
+                        currentSoundSettings[soundType].file_path = '';
+                    }
+                }
+
+                // Delete the file from server (would need additional endpoint)
+                await apiRequest(`/api/sounds/delete`, {
+                    method: "DELETE",
+                    body: JSON.stringify({ file_path: filePath })
+                });
+
+                await loadSoundLibrary(); // Reload the library
+                setSoundMessage("Sound gelöscht.");
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+            }
+        }
+
+        function updateVolumeSliderBackground(slider) {
+            const value = (slider.value / slider.max) * 100;
+            slider.style.setProperty('--value', `${value}%`);
+        }
+
+        async function handleSoundToggle(event) {
+            const soundType = event.target.id.replace('_enabled', '');
+            const enabled = event.target.checked;
+
+            try {
+                await apiRequest("/api/sounds", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        sound_type: soundType,
+                        enabled: enabled
+                    })
+                });
+                setSoundMessage(enabled ? "Sound aktiviert." : "Sound deaktiviert.");
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+                // Revert UI state on error
+                event.target.checked = !enabled;
+            }
+        }
+
+        async function handleVolumeChange(event) {
+            const soundType = event.target.id.replace('_volume', '');
+            const volume = parseInt(event.target.value);
+            const volumeLabel = document.getElementById(`${soundType}_volume_label`);
+
+            if (volumeLabel) volumeLabel.textContent = `${volume}%`;
+            updateVolumeSliderBackground(event.target);
+
+            try {
+                await apiRequest("/api/sounds", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        sound_type: soundType,
+                        volume: volume
+                    })
+                });
+            } catch (error) {
+                console.error("Failed to update volume:", error);
+            }
+        }
+
+        async function handleSoundTest(event) {
+            const button = event.target.closest("button");
+            const soundType = button.dataset.sound;
+
+            // Disable button during test
+            button.disabled = true;
+            const originalContent = button.innerHTML;
+            button.innerHTML = `
+                <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 3V10M10 13V17M3 10H7M13 10H17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                Teste...
+            `;
+
+            try {
+                const result = await apiRequest("/api/sounds/test", {
+                    method: "POST",
+                    body: JSON.stringify({ sound_type: soundType })
+                });
+
+                // Create audio element for testing
+                const audio = new Audio(`/${result.file_path}`);
+                audio.volume = result.volume / 100;
+
+                audio.play().then(() => {
+                    setSoundMessage("Sound wird abgespielt.");
+                }).catch((error) => {
+                    setSoundMessage("Fehler bei der Wiedergabe.", "error");
+                }).finally(() => {
+                    // Restore button
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalContent;
+                    }, 1000);
+                });
+
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+                button.disabled = false;
+                button.innerHTML = originalContent;
+            }
+        }
+
+        // Upload Modal Functions
+        function showUploadModal() {
+            document.getElementById('upload-modal').style.display = 'flex';
+        }
+
+        function hideUploadModal() {
+            document.getElementById('upload-modal').style.display = 'none';
+            resetUploadForm();
+        }
+
+        function resetUploadForm() {
+            const fileInput = document.getElementById('sound-file-input');
+            const placeholderEl = document.getElementById('upload-placeholder');
+            const previewEl = document.getElementById('file-preview');
+            const confirmBtn = document.getElementById('confirm-upload-btn');
+
+            if (fileInput) fileInput.value = '';
+            if (placeholderEl) placeholderEl.style.display = 'block';
+            if (previewEl) previewEl.style.display = 'none';
+            if (confirmBtn) confirmBtn.disabled = true;
+        }
+
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            // Validate file
+            const allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+
+            if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav)$/i)) {
+                setSoundMessage("Nur MP3 und WAV Dateien sind erlaubt.", "error");
+                return;
+            }
+
+            if (file.size > maxSize) {
+                setSoundMessage("Die Datei ist größer als 10MB.", "error");
+                return;
+            }
+
+            // Show file preview - Check if elements exist first
+            const nameEl = document.getElementById('selected-file-name');
+            const sizeEl = document.getElementById('selected-file-size');
+            const placeholderEl = document.getElementById('upload-placeholder');
+            const previewEl = document.getElementById('file-preview');
+            const confirmBtn = document.getElementById('confirm-upload-btn');
+
+            if (nameEl) nameEl.textContent = file.name;
+            if (sizeEl) sizeEl.textContent = formatFileSize(file.size);
+            if (placeholderEl) placeholderEl.style.display = 'none';
+            if (previewEl) previewEl.style.display = 'block';
+            if (confirmBtn) confirmBtn.disabled = false;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function handleFileUpload() {
+            const fileInput = document.getElementById('sound-file-input');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('sound_type', 'custom'); // Generic type for library
+
+            try {
+                const response = await fetch('/api/sounds/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Upload failed');
+                }
+
+                const result = await response.json();
+                setSoundMessage("Sound erfolgreich hochgeladen.");
+                hideUploadModal();
+                await loadSoundLibrary(); // Refresh library
+            } catch (error) {
+                setSoundMessage(error.message, "error");
+            }
+        }
+
         function attachEventListeners() {
             createForm.addEventListener("submit", handleCreate);
             createForm.addEventListener("input", () => validateCreate({ allowIncomplete: true }));
@@ -903,10 +1950,83 @@
                 revisionsPanel.hidden = true;
                 revisionLog.innerHTML = "";
             });
+
+            // Sound configuration event listeners
+            document.querySelectorAll('[id$="_enabled"]').forEach(input => {
+                input.addEventListener("change", handleSoundToggle);
+            });
+
+            document.querySelectorAll('.volume-slider').forEach(slider => {
+                slider.addEventListener("input", handleVolumeChange);
+                updateVolumeSliderBackground(slider);
+            });
+
+            document.querySelectorAll('.test-btn').forEach(button => {
+                button.addEventListener("click", handleSoundTest);
+            });
+
+            // Upload modal event listeners - Check if elements exist first
+            const uploadBtn = document.getElementById('upload-new-sound-btn');
+            const closeBtn = document.getElementById('close-upload-modal');
+            const cancelBtn = document.getElementById('cancel-upload-btn');
+            const confirmBtn = document.getElementById('confirm-upload-btn');
+            const removeBtn = document.getElementById('remove-file-btn');
+
+            if (uploadBtn) uploadBtn.addEventListener('click', showUploadModal);
+            if (closeBtn) closeBtn.addEventListener('click', hideUploadModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', hideUploadModal);
+            if (confirmBtn) confirmBtn.addEventListener('click', handleFileUpload);
+            if (removeBtn) removeBtn.addEventListener('click', resetUploadForm);
+
+            // File upload area events
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('sound-file-input');
+
+            if (uploadArea && fileInput) {
+                uploadArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) handleFileSelect(file);
+                });
+
+                // Drag and drop events
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const placeholder = uploadArea.querySelector('.upload-placeholder');
+                    if (placeholder) placeholder.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    const placeholder = uploadArea.querySelector('.upload-placeholder');
+                    if (placeholder) placeholder.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const placeholder = uploadArea.querySelector('.upload-placeholder');
+                    if (placeholder) placeholder.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileSelect(files[0]);
+                    }
+                });
+            }
+
+            // Close modal on background click
+            const modal = document.getElementById('upload-modal');
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target.id === 'upload-modal') {
+                        hideUploadModal();
+                    }
+                });
+            }
         }
 
         attachEventListeners();
         loadBreaks();
+        loadSoundSettings();
         startActiveHighlightTimer();
     </script>
 </body>

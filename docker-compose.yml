@@ -6,7 +6,7 @@ services:
       - "5000:5000"
     volumes:
       - ./backend/breaks.json:/app/backend/breaks.json
-      - ./backend/data:/app/backend/data
+      - ./backend/storage:/app/backend/storage
     restart: unless-stopped
     environment:
       - FLASK_ENV=production
