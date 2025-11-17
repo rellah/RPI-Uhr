@@ -331,20 +331,28 @@ def upload_sound():
 
     try:
         if sound_type == "custom":
-            # For library uploads, generate unique filename
-            import uuid
-            unique_id = str(uuid.uuid4())[:8]
-            safe_filename = werkzeug.utils.secure_filename(f"{unique_id}_{file.filename}")
-            file_path = os.path.join(SOUNDS_DIR, safe_filename)
+            # For library uploads, use the original filename
+            safe_filename = werkzeug.utils.secure_filename(file.filename)
+
+            # Handle filename conflicts by appending a number if needed
+            base_name, ext = os.path.splitext(safe_filename)
+            counter = 1
+            final_filename = safe_filename
+
+            while os.path.exists(os.path.join(SOUNDS_DIR, final_filename)):
+                final_filename = f"{base_name}_{counter}{ext}"
+                counter += 1
+
+            file_path = os.path.join(SOUNDS_DIR, final_filename)
 
             # Save file
             file.save(file_path)
 
             # Return library file info
-            relative_path = f"sounds/{safe_filename}"
+            relative_path = f"sounds/{final_filename}"
             return jsonify({
                 "id": relative_path,
-                "name": file.filename,
+                "name": final_filename,
                 "type": "custom",
                 "file_path": relative_path
             })

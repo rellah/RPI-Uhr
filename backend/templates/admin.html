@@ -751,7 +751,7 @@
             max-width: 100%;
             height: 6px;
             border-radius: 3px;
-            background: rgba(89, 97, 120, 0.3); /* Always show the track background */
+            background: rgba(89, 97, 120, 0.3);
             outline: none;
             -webkit-appearance: none;
             box-sizing: border-box;
@@ -759,7 +759,15 @@
             position: relative;
         }
 
-        /* Track styling */
+        /* Force Chromium browsers to show the track */
+        .volume-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(89, 97, 120, 0.3);
+            border-radius: 3px;
+        }
+
         .volume-slider::-webkit-slider-track {
             width: 100%;
             height: 6px;
@@ -788,7 +796,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
             border: 3px solid white;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            margin-top: -7px; /* Center thumb on track */
+            margin-top: -6px; /* Center thumb on track */
             z-index: 2; /* Ensure thumb is above the pseudo-element */
         }
 
